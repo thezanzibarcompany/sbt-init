@@ -1,0 +1,26 @@
+# https://aka.ms/yaml
+
+trigger:
+  - master
+
+variables:
+  dockerRegistryServiceConnection: container-registry-thezanzibarcompany
+  containerRegistry: thezanzibarcompany.azurecr.io
+
+resources:
+  containers:
+    - container: jdk8
+      image: thezanzibarcompany.azurecr.io/ubi-jdk8
+      endpoint: container-registry-thezanzibarcompany
+
+stages:
+  - stage: Build
+    displayName: 'Build & Unit Test Stage'
+    jobs:
+      - job: Build
+        displayName: 'Compile sources and run unit tests'
+        pool:
+          vmImage: 'ubuntu-latest'
+        container: jdk8
+        steps:
+          - script: sbt package
