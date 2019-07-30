@@ -44,7 +44,8 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                gpg --import $(publishKey.secureFilePath)
+                gpg --keyserver keyserver.ubuntu.com --recv FB4EF913C8E9D815
+                gpg --import --import-options keep-ownertrust $(publishKey.secureFilePath)
                 echo "addSbtPlugin(\"io.crashbox\" % \"sbt-gpg\" % \"latest.release\")" > project/sbtgpg.sbt
               failOnStderr: true
               noProfile: false
