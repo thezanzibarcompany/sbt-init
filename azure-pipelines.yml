@@ -23,4 +23,39 @@ stages:
           vmImage: 'ubuntu-latest'
         container: jdk8
         steps:
-          - script: sbt package
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: 'sbt test package'
+              failOnStderr: true
+              noProfile: false
+              noRc: false
+      - job: Publish
+        displayName: 'Compile sources, assemble and publish package'
+        pool:
+          vmImage: 'ubuntu-latest'
+        container: jdk8
+        steps:
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: 'publish.asc'
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                gpg --import publish.asc
+                rm -f publish.asc
+                echo "addSbtPlugin(\"io.crashbox\" % \"sbt-gpg\" % \"latest.release\")" > project/sbtgpg.sbt
+              failOnStderr: true
+              noProfile: false
+              noRc: false
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: 'internal_repo_credentials.sbt'
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: 'sbt publish'
+              failOnStderr: true
+              noProfile: false
+              noRc: false
