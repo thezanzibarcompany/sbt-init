@@ -27,10 +27,10 @@ stages:
             inputs:
               targetType: 'inline'
               script: 'sbt test package'
-              failOnStderr: true
               noProfile: false
               noRc: false
       - job: Publish
+        dependsOn: Build
         displayName: 'Compile sources, assemble and publish package'
         pool:
           vmImage: 'ubuntu-latest'
@@ -47,7 +47,6 @@ stages:
                 gpg --keyserver keyserver.ubuntu.com --recv FB4EF913C8E9D815
                 gpg --import --import-options keep-ownertrust $(publishKey.secureFilePath)
                 echo "addSbtPlugin(\"io.crashbox\" % \"sbt-gpg\" % \"latest.release\")" > project/sbtgpg.sbt
-              failOnStderr: true
               noProfile: false
               noRc: false
           - task: DownloadSecureFile@1
@@ -60,6 +59,5 @@ stages:
               script: |
                 cp $(sbtCredentials.secureFilePath) ./
                 sbt publish
-              failOnStderr: true
               noProfile: false
               noRc: false
