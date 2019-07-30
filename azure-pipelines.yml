@@ -37,25 +37,28 @@ stages:
         container: jdk8
         steps:
           - task: DownloadSecureFile@1
+            name: publishKey
             inputs:
               secureFile: 'publish.asc'
           - task: Bash@3
             inputs:
               targetType: 'inline'
               script: |
-                gpg --import publish.asc
-                rm -f publish.asc
+                gpg --import $(publishKey.secureFilePath)
                 echo "addSbtPlugin(\"io.crashbox\" % \"sbt-gpg\" % \"latest.release\")" > project/sbtgpg.sbt
               failOnStderr: true
               noProfile: false
               noRc: false
           - task: DownloadSecureFile@1
+            name: sbtCredentials
             inputs:
               secureFile: 'internal_repo_credentials.sbt'
           - task: Bash@3
             inputs:
               targetType: 'inline'
-              script: 'sbt publish'
+              script: |
+                cp $(sbtCredentials.secureFilePath) ./
+                sbt publish
               failOnStderr: true
               noProfile: false
               noRc: false
